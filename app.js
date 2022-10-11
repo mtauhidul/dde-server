@@ -13,6 +13,14 @@ app.use(express.json());
 
 const numCPUs = os.cpus().length;
 
+app.get('/', (req, res) => {
+  res.send('Domain Extractor API');
+});
+
+app.get('/api', (req, res) => {
+  res.send('Domain Extractor API');
+});
+
 app.post('/api', async (req, res) => {
   const domains = req.body.domains;
   const promises = domains.map((domain) => {
