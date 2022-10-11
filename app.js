@@ -10,7 +10,6 @@ app.use(express.json());
 
 app.post('/api', async (req, res) => {
   const domains = req.body.domains;
-  console.log(domains);
   const promises = domains.map((domain) => {
     return axios.get(
       `http://web.archive.org/cdx/search/cdx?url=${domain}*&output=json&`
@@ -82,6 +81,7 @@ app.post('/api', async (req, res) => {
           return newArray;
         })
       ).then((data) => {
+        console.log('Status check completed');
         res.send(data);
       });
     });
