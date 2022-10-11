@@ -1,5 +1,8 @@
 const express = require('express');
 const app = express();
+const cluster = require('cluster');
+const os = require('os');
+
 const cors = require('cors');
 const checkHttpStatus = require('check-http-status');
 const axios = require('axios');
@@ -7,6 +10,8 @@ const axios = require('axios');
 app.use(cors());
 app.use(express.static('build'));
 app.use(express.json());
+
+const numCPUs = os.cpus().length;
 
 app.post('/api', async (req, res) => {
   const domains = req.body.domains;
@@ -81,7 +86,8 @@ app.post('/api', async (req, res) => {
           return newArray;
         })
       ).then((data) => {
-        console.log('Status check completed');
+        console.log();
+        console.log(`Status check completed by worker ${process.pid}`);
         res.send(data);
       });
     });
