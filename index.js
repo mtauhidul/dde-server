@@ -1,4 +1,5 @@
 const app = require('./app');
+require('dotenv').config;
 const cluster = require('cluster');
 const os = require('os');
 const numCPUs = os.cpus().length;
@@ -15,7 +16,7 @@ if (cluster.isMaster) {
     console.log(`worker ${worker.process.pid} died`);
   });
 } else {
-  server.listen((port = 3001 || PORT), () => {
+  server.listen((port = 3001 || process.env.PORT), () => {
     console.log(`Server ${process.pid} is running on port ${port}`);
   });
 }
