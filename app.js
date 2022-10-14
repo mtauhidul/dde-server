@@ -11,11 +11,17 @@ app.use(express.json());
 
 app.post('/api', async (req, res) => {
   const domains = req.body.domains;
-  console.log(domains);
+  const timeFrame = req.body.timeFrame;
+
+  const currentYear = new Date().getFullYear();
+  const previousYear = currentYear - 1;
+
   const results = await Promise.all(
     domains.map(async (domain) => {
       const result = await axios.get(
-        `http://web.archive.org/cdx/search/cdx?url=${domain}*&fl=original&output=json&`
+        `http://web.archive.org/cdx/search/cdx?url=${domain}*&fl=original&output=json&${
+          timeFrame === 'all' ? '' : `&from=${previousYear}&to=${currentYear}`
+        }`
       );
       return {
         domain,
