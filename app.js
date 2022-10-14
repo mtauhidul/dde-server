@@ -1,104 +1,84 @@
 const express = require('express');
 const app = express();
-const cluster = require('cluster');
-const os = require('os');
 
 const cors = require('cors');
-const checkHttpStatus = require('check-http-status');
 const axios = require('axios');
+const checkStatusCode = require('./utils/statusCheck');
 
 app.use(cors());
 app.use(express.static('build'));
 app.use(express.json());
 
-const numCPUs = os.cpus().length;
-
-app.get('/', (req, res) => {
-  res.send('Domain Extractor API');
-});
-
-app.get('/api', (req, res) => {
-  res.send('Domain Extractor API');
-});
-
 app.post('/api', async (req, res) => {
   const domains = req.body.domains;
-  const promises = domains.map((domain) => {
-    return axios.get(
-      `http://web.archive.org/cdx/search/cdx?url=${domain}*&output=json&`
-    );
+  console.log(domains);
+  const results = await Promise.all(
+    domains.map(async (domain) => {
+      const result = await axios.get(
+        `http://web.archive.org/cdx/search/cdx?url=${domain}*&fl=original&output=json&`
+      );
+      return {
+        domain,
+        urls: result.data.slice(1).flat(),
+      };
+    })
+  );
+
+  const filteredResults = results.map((result) => {
+    return {
+      domain: result.domain,
+      urls: result.urls
+        .map((url) => url.replace(':80', ''))
+        .filter((url, index, self) => self.indexOf(url) === index)
+        .filter(
+          (url) =>
+            !url.includes('.min.js') &&
+            !url.includes('.min.css') &&
+            !url.includes('.js') &&
+            !url.includes('.css') &&
+            !url.includes('.jpeg') &&
+            !url.includes('.jpg') &&
+            !url.includes('.png') &&
+            !url.includes('.svg') &&
+            !url.includes('.gif') &&
+            !url.includes('.ico') &&
+            !url.includes('.php') &&
+            !url.includes('.xml') &&
+            !url.includes('.json') &&
+            !url.includes('.woff') &&
+            !url.includes('.woff2') &&
+            !url.includes('.ttf') &&
+            !url.includes('.eot') &&
+            !url.includes('.otf') &&
+            !url.includes('.txt')
+        ),
+    };
   });
-  Promise.all(promises)
-    .then((responses) => Promise.all(responses.map((r) => r)))
-    .then((data) => {
-      const result = data.map((d) => {
-        return d.data.map((e) => {
-          return e[2];
-        });
-      });
 
-      const updatedData = result.map((domainData, index) => {
-        const domainDataArray = domainData.slice(1);
-        return {
-          domain: domains[index],
-          urls: domainDataArray,
-        };
-      });
-
-      // Remove :80 from the urls
-      const updatedData2 = updatedData.map((domainData) => {
-        const urls = domainData.urls.map((url) => {
-          return url.replace(':80', '');
-        });
-        return {
-          domain: domainData.domain,
-          urls: urls,
-        };
-      });
-
-      // Remove duplicate urls
-      const updatedData3 = updatedData2.map((domainData) => {
-        const urls = domainData.urls.filter(
-          (url, index, self) =>
-            self.indexOf(url) === index &&
-            url !== '' &&
-            url !== 'null' &&
-            url !== 'undefined' &&
-            url !== 'NaN' &&
-            url !== ' '
-        );
-        return {
-          domain: domainData.domain,
-          urls: urls,
-        };
-      });
-
-      let finalData = [];
-
-      // CHECK HTTP STATUS CODES
-      Promise.all(
-        updatedData3.map(async (domainData) => {
-          const urls = await domainData.urls.map(async (url) => {
-            const status = await checkHttpStatus({ urls: [url] });
-            return {
-              url: url,
-              status: status[0][2],
-            };
-          });
-          const newArray = Promise.all(urls).then((updatedUrls) => {
-            return {
-              domain: domainData.domain,
-              urls: updatedUrls,
-            };
-          });
-          return newArray;
+  const statusResults = await Promise.all(
+    filteredResults.map(async (result) => {
+      const urls = await Promise.all(
+        result.urls.map(async (url) => {
+          const statusCode = await checkStatusCode(url, {}, false);
+          return {
+            url,
+            status: statusCode[0][2] || 503,
+          };
         })
-      ).then((data) => {
-        console.log();
-        console.log(`Status check completed by worker ${process.pid}`);
-        res.send(data);
-      });
-    });
+      );
+      // Console progress
+      return {
+        id: Date.now(),
+        domain: result.domain[0],
+        urls,
+      };
+    })
+  );
+
+  res.send(statusResults);
+  if (statusResults) {
+    console.log('Data send successfully!');
+  }
 });
 
 module.exports = app;

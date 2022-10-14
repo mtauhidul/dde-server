@@ -15,7 +15,7 @@ if (cluster.isMaster) {
     console.log(`worker ${worker.process.pid} died`);
   });
 } else {
-  server.listen((port = 3001 || POST), () => {
+  server.listen((port = 3001 || PORT), () => {
     console.log(`Server ${process.pid} is running on port ${port}`);
   });
 }
