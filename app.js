@@ -30,7 +30,14 @@ app.post('/api', async (req, res) => {
     })
   );
 
-  const filteredResults = results.map((result) => {
+  const domainFilteredResults = results.map((result) => {
+    return {
+      ...result,
+      urls: result.urls.filter((url) => !url.includes('embed?url=')),
+    };
+  });
+
+  const filteredResults = domainFilteredResults.map((result) => {
     return {
       domain: result.domain,
       urls: result.urls
