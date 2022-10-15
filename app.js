@@ -73,10 +73,10 @@ app.post('/api', async (req, res) => {
     filteredResults.map(async (result) => {
       const urls = await Promise.all(
         result.urls.map(async (url) => {
-          const statusCode = await checkStatusCode(url, {}, false);
+          const statusCode = await checkStatusCode(url);
           return {
             url,
-            status: statusCode[0][2] || 503,
+            status: statusCode,
           };
         })
       );
