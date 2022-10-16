@@ -1,10 +1,10 @@
-const fetch = require('node-fetch');
+const axios = require('axios');
 
 async function checkStatusCode(urlToCheck) {
   console.log(`Status checking started for ${urlToCheck}`);
   async function makeRequest() {
     try {
-      const response = await fetch(urlToCheck);
+      const response = await axios.get(urlToCheck);
 
       console.log('response.status: ', response.status); // 👉️ 200
       console.log(response);
