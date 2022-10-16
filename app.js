@@ -10,6 +10,7 @@ app.use(express.static('build'));
 app.use(express.json());
 
 app.post('/api', async (req, res) => {
+  console.log('New API request');
   const domains = req.body.domains;
   const timeFrame = req.body.timeFrame;
   const limit = req.body.limit;
@@ -64,7 +65,8 @@ app.post('/api', async (req, res) => {
             !url.includes('.ttf') &&
             !url.includes('.eot') &&
             !url.includes('.otf') &&
-            !url.includes('.txt')
+            !url.includes('.txt') &&
+            !url.includes('.mp4')
         ),
     };
   });
@@ -76,7 +78,7 @@ app.post('/api', async (req, res) => {
           const statusCode = await checkStatusCode(url);
           return {
             url,
-            status: statusCode,
+            status: statusCode[0][2],
           };
         })
       );
@@ -88,11 +90,10 @@ app.post('/api', async (req, res) => {
       };
     })
   );
-
-  res.send(statusResults);
   if (statusResults) {
     console.log('Data send successfully!');
   }
+  res.send(statusResults).end();
 });
 
 module.exports = app;
