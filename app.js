@@ -25,6 +25,7 @@ app.post('/api', async (req, res) => {
           timeFrame === 'all' ? '' : `&from=${previousYear}&to=${currentYear}`
         }${limit > 0 ? `&limit=${limit}` : ''}`
       );
+      console.log(`${domain} sent ${result.data.length} urls`);
       return {
         domain,
         urls: result.data.slice(1).flat(),
@@ -78,7 +79,7 @@ app.post('/api', async (req, res) => {
           const statusCode = await checkStatusCode(url);
           return {
             url,
-            status: statusCode[0][2],
+            status: statusCode[0][2] || 200,
           };
         })
       );

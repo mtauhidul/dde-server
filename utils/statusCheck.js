@@ -11,6 +11,7 @@ function axiosRequest(urlToCheck, axiosOptions, redirect) {
     axios
       .get(urlToCheck, axiosOptions)
       .then((response) => {
+        console.log(response.status);
         httpStatus[2] = response.status;
         if (redirect) {
           httpStatus[1] = '';
