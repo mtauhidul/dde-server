@@ -20,6 +20,7 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "nodemon": "^2.0.15",
-    "supertest": "^6.2.2"
+    "supertest": "^6.2.2",
+    "vercel": "^28.4.12"
   }
 }
