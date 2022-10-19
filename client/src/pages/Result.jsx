@@ -11,7 +11,7 @@ const Result = () => {
   const dataArray = React.useContext(DataContext);
   const [loading, setLoading] = React.useState(true);
 
-  const baseURL = 'https://domain-data-extractor.onrender.com';
+  const baseURL = 'https://dde-server.vercel.app';
 
   const navigate = useNavigate();
 
