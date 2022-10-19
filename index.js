@@ -9,6 +9,8 @@ const server = http.createServer(app);
 
 const port = process.env.PORT || 3001;
 
+// Clusters
+
 if (cluster.isMaster) {
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
