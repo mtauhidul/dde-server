@@ -26,7 +26,7 @@ app.post('/api', async (req, res) => {
   const results = await Promise.all(
     domains.map(async (domain) => {
       const result = await axios.get(
-        `http://web.archive.org/cdx/search/cdx?url=${domain}*&fl=original&output=json&${
+        `http://web.archive.org/cdx/search/cdx?url=${domain}&matchType=domain&filter=mimetype:text/html&collapse=urlkey&fl=original&output=json&${
           timeFrame === 'all' ? '' : `&from=${previousYear}&to=${currentYear}`
         }${limit > 0 ? `&limit=${limit}` : ''}`
       );
